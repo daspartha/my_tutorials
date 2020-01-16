@@ -1,0 +1,248 @@
+---
+title: "Intro to R and R Studio"
+subtitle: "Data visualization using ggplot2"
+author: "Partha Das"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+#    css: custom.css
+    toc: true
+    toc_float: true
+#    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# The `mpg` data frame
+
+Fuel economy data from 1999 and 2008 for 38 popular models of car. Explore by `?mpg`
+
+Lets focus on two variables: 
+
+1. `displ`, a car’s engine size, in litres.
+2. `hwy`, a car’s fuel efficiency on the highway, in miles per gallon (mpg)
+
+
+## Creating a ggplot
+
+
+```{r}
+
+ggplot(data = mpg) + # creats an empty graph
+         geom_point(mapping = aes(x = displ, y = hwy)) #geometric function with mapping of variables
+```
+
+## Graphing template
+
+```{r, eval=FALSE}
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+```
+* Explore various geom functions
+* Make scatter plots involving other variable combinations
+
+## Aesthetic mappings
+
+### Color the point according to the class of the cars
+
+```{r}
+
+ggplot(data = mpg) + 
+         geom_point(mapping = aes(x = displ, y = hwy, color = class)) #colour the point by class variables
+```
+
+### Size of the points accroding to the class of the cars
+
+```{r, error=TRUE}
+
+ggplot(data = mpg) + 
+         geom_point(mapping = aes(x = displ, y = hwy, size = class)) #size of the point by class variables
+```
+
+### Transparency of the points accroding to the class of the cars
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+```
+
+### Shape of the points accroding to the class of the cars
+
+By default ggplot use 6 shapes
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+```
+
+### Manually defining astehtics
+
+Shapes
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class)) +
+  scale_shape_manual(values = c(1:7))
+```
+
+Color
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = 'blue')
+```
+
+## Faceting
+
+One way to add additional variables is with aesthetics. Another way, particularly useful for categorical variables, is to split your plot into facets, subplots that each display one subset of the data.
+
+### To facet your plot by a single variable, use `facet_wrap()`
+
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = 'blue') +
+  facet_wrap(~class)
+```
+
+### Adjust number of rows and coloumns
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = 'blue') +
+  facet_wrap(~class, nrow = 2)
+```
+
+### To facet your plot by a two variables, use `facet_grid()`
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ cyl)
+```
+
+### For single variable `facet_grid()` can also be used
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(. ~ class)
+```
+
+
+# The `diamonds` data frame
+
+The diamonds dataset comes in ggplot2 and contains information about ~54,000 diamonds, including the `price`, `carat`, `color`, `clarity`, and `cut` of each diamond. 
+
+## A bar plot
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+```
+
+## Position adjustment
+
+### Color
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, colour = cut))
+```
+
+### Fill 
+
+```{r}
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = cut))
+```
+
+### Fill differrent variable for stacked graphs
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity))
+```
+
+### Position = Fill for percentage plots
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "fill")
+```
+
+### Position = dodge for dodged graphs
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+```
+
+
+# `gapminder` dataframe
+
+```{r, eval=FALSE}
+install.packages(gapminder)
+```
+
+```{r}
+library(gapminder)
+```
+
+## Explore data
+
+
+```{r}
+head(gapminder)
+```
+
+## Coloumn chart
+
+### Using `geom_bar`
+
+```{r}
+
+gapminder %>%
+  filter(country %in% c("India", "China", "Bangladesh"),
+         year == 2007) %>%
+ggplot() + 
+  geom_bar(mapping = aes(x = country, y = lifeExp), stat = "identity")
+```
+
+### Using `geom_col`
+
+```{r}
+
+gapminder %>%
+  filter(country %in% c("India", "China", "Bangladesh"),
+         year == 2007) %>%
+ggplot() + 
+  geom_col(mapping = aes(x = country, y = lifeExp))
+```
+
+## Line plot
+
+### Single plot
+
+```{r}
+
+gapminder %>%
+  filter(country %in% c("India", "China", "Bangladesh")) %>%
+ggplot() + 
+  geom_line(mapping = aes(x = year, y = gdpPercap, group = country, color = country))
+```
+
+### Faceted
+
+```{r}
+
+gapminder %>%
+  filter(country %in% c("India", "China", "Bangladesh")) %>%
+ggplot() + 
+  geom_line(mapping = aes(x = year, y = gdpPercap, group = country)) +
+  facet_wrap(~country)
+```
