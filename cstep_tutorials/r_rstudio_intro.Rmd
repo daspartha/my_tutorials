@@ -186,7 +186,7 @@ rm(list = ls(all.names = TRUE)) # removes all environment variable
 
 ### R Objects
 
-Major data types: `double`, `integer`, `complex`, `logical`, `character`, `factor` The sixth one`factor is variable which take on a limited number of different values. Factors usually look like character data, but are typically used to represent categorical information.
+Major data types: `double`, `integer`, `complex`, `logical`, `character`.
 
 ```{r}
 
@@ -312,7 +312,7 @@ R packages extend the functionality of core/ base R by providing additional func
 ```{r, eval=FALSE}
 
 install.packages(dplyr)
-install.packages(c(dplyr, ggplot, tidyr))
+install.packages(c('dplyr', 'ggplot', 'tidyr'))
 ```
 
 ### From RStudio

@@ -1,0 +1,52 @@
+---
+title: "Import / Export data to / from R"
+author: "Partha Das"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+#    css: custom.css
+    toc: true
+    toc_float: true
+#    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Intializing Libraries
+
+```{r}
+library(readr)
+library(xlsx)
+library(here)
+```
+
+
+## Read/ write text files
+
+A lots of data comes as a simple tabular text files. We shall learn how to to import those data into R using `readr` package of tidyverse family
+
+### Reading a comma separated file 
+
+```{r}
+
+netflix <- read_csv(here("cstep_tutorials/data", "netflix_titles_nov_2019.csv"))
+
+```
+
+### Read a delimited file
+
+
+
+# From Excel files
+
+A lots of data comes as Excel spreadsheets simple tabular text files. We shall learn how to to import those data into R using `readr` package of tidyverse family
+
+# Writing data in R
+
+# To text files
+
+
+# To Excel files
