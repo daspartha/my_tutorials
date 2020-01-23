@@ -1,0 +1,413 @@
+---
+title: "Data wrangling using R"
+author: "Partha Das"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+#    css: custom.css
+    toc: true
+    toc_float: true
+#    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'F:/learning/r_tutorials')
+```
+
+# Create a script
+
+Create a script (_e.g._ `day_2.R` ), save it inside your project directory.
+We shall develop the script as we go through. To better documenting, you can make explicit sections similar to shown in the left hand side by commenting using `#` in your script. 
+
+```{r, eval=FALSE}
+
+# Create a script
+#         .........
+# Attaching Libraries
+#         .........
+# Getting and importing data in R
+  ## Getting data
+    #         .........
+  ## Importing data
+    #         .........
+
+```
+
+Advanced option of the same is`rmarkdown` documents. We shall learn about it later. 
+
+# Attaching Libraries
+
+
+In this tutorial we shall be using following packages. Attach them by `library()`.
+
+* `readr` will be used to import text based data
+* `tidyr` will be used to change the _shape_ of the data
+* `dplyr` will be used to transform data
+* `margittr` will be used to just show some operation of `%>% operator 
+* `here` will be used to manage location of files in the directories
+
+```{r, message=FALSE}
+library(readr)
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+library(magrittr)
+library(here)
+```
+
+# Getting and importing data in R
+
+## Getting data
+
+[OECD](https://stats.oecd.org/) publishes lots of data corresponding to various fields like economics, environment, health etc. For the present tutorial let's download a dataset related to [greenhouse emission by sources](https://stats.oecd.org/Index.aspx?DataSetCode=AIR_GHG) 
+
+![](here("pics", 'oecd.png')   
+
+Save the data in a `data` folder inside of your parent project directory. 
+We shall work with text files in the present tutorial. In the next tutorial we shall import data from `Excel spreadsheets`.
+
+
+## Importing data using `read_csv()`
+
+```{r, message = FALSE, warning=FALSE}
+
+oecd <- read_csv("F:/learning/r_tutorials/cstep_tutorials/data/AIR_GHG_21012020211143292.csv")
+```
+
+But, never ever use absolute pathsSome people will SET YOUR COMPUTER ON FIRE if you share codes with them having absolute paths. Before deep dive into data importing let explore waht is the fuss about `here()`.
+
+You can still live with
+
+```{r, message = FALSE, warning=FALSE}
+
+oecd <- read_csv("./cstep_tutorials/data/AIR_GHG_21012020211143292.csv")
+```
+
+With `here()`
+
+```{r, message = FALSE, warning=FALSE}
+
+oecd <- read_csv(here('cstep_tutorials/data', "AIR_GHG_21012020211143292.csv"))
+```
+
+We shall be using following approach
+
+```{r}
+
+oecd <- read_csv(here('cstep_tutorials', 'data', "AIR_GHG_21012020211143292.csv"))
+```
+
+
+Wow!! there are lots of messages thrown up by R while reading the dataset. Let us try to understand what are these all about. 
+
+We can tell to guess the coloumn type based on a higher number of values explicitly
+
+```{r}
+
+oecd <- read_csv(here('cstep_tutorials', 'data', "AIR_GHG_21012020211143292.csv"), guess_max = 25000)
+```
+
+Or, parse columns explicitly
+```{r}
+
+oecd <- read_csv(here('cstep_tutorials/data', "AIR_GHG_21012020211143292.csv"), 
+                 col_types = cols('Flag Codes' = col_character(),
+                                  'Flags' = col_character()))
+```
+
+### Exploring some arguments
+
+* `col_names`
+* `col_types`
+* `na`
+* `skip`
+* `n_max`
+* `guess_max`
+
+## Importing data using `read_delim()`
+
+```{r}
+
+oecd <- read_delim(here('cstep_tutorials/data', "AIR_GHG_21012020211143292.csv"), 
+                   delim = ',', col_types = cols('Flag Codes' = col_character(),
+                                  'Flags' = col_character()))
+```
+
+
+# Pipe operator
+
+R is a functional language, which means that your code often contains a lot of parenthesis, ( and ). When you have complex code, this often will mean that you will have to nest those parentheses together. This makes your R code hard to read and understand. Here's where %>% comes in to the rescue!
+
+`%>%` operator comes from `magrittr` package and used heavily with analysis with tidyverse packages
+
+Overall idea
+```{r, eval = FALSE}
+x %>% f(y)
+becomes f(x, y)
+```
+
+Some examples
+```{r}
+
+x <- seq(1, 50, by = .5)
+
+res <- mean(log((round(x, 1)+10)^3)*5, 3); res
+
+res <- seq(1, 50, by = .5) %>%
+  round(1) %>%
+  add(10) %>%
+  multiply_by(5) %>%
+  raise_to_power(3) %>% 
+  log(2) %>%
+  mean(); res
+
+
+res <- seq(1, 50, by = .5) %>%
+  round(1) %>%
+  '+'(10) %>%
+   '*'(5) %>%
+  '^'(3) %>% 
+  log(2) %>%
+  mean(); res 
+  
+```
+
+From now on we shall be using `%>%` operator to chain series of operation on a dataset. 
+
+# Tidy your data
+
+There are three interrelated rules which make a dataset tidy:
+
+* Each variable must have its own column
+* Each observation must have its own row
+* Each value must have its own cell
+
+## Make data untidy
+
+```{r}
+
+oecd %>% 
+  filter(!grepl("Incomplete", Flags),
+         VAR %in% c('TOTAL', 'INDEX_1990', 'INDEX_2000')) %>%
+    select(-c(YEA, contains('Reference')),
+           -matches('Flag|Flags')) %>%
+    select(Country, POL, Year, Value, VAR) %>%
+  pivot_wider(names_from = Year, values_from = Value) %>%
+  View()
+```
+
+Let us save this data to a data frame `oecd_untidy`
+
+```{r}
+oecd_untidy <- oecd %>% 
+  filter(!grepl("Incomplete", Flags),
+         VAR %in% c('TOTAL', 'INDEX_1990', 'INDEX_2000')) %>%
+    select(-c(YEA, contains('Reference')),
+           -matches('Flag|Flags')) %>%
+    select(COU, Country, POL, Year, Value, VAR) %>%
+  pivot_wider(names_from = Year, values_from = Value)
+```
+
+
+## Tidying data 
+
+```{r}
+
+ oecd_untidy %>%
+  pivot_longer(cols = '1990' : '2017', values_to = 'th_tonne_eq_co2', names_to = 'year') %>%
+  pivot_wider(values_from = th_tonne_eq_co2, names_from = VAR) 
+```
+
+Let us save this data to a data frame `oecd_tidy`. We shall continue the tutorial with this dataset. 
+
+```{r}
+
+ oecd_tidy <-  oecd_untidy %>%
+  pivot_longer(cols = '1990' : '2017', values_to = 'th_tonne_eq_co2', names_to = 'year') %>%
+  pivot_wider(values_from = th_tonne_eq_co2, names_from = VAR) 
+```
+
+
+# Data transformation using `dplyr`
+
+Some important 'dplyr' verbs to remember
+
+* Pick variables by their names: `select()`
+* Pick observations by their values: `filter()`
+* Reorder the rows: `arrange()`
+* Create new variables with functions of existing variables: `mutate()`
+* Collapse many values down to a single summary: `summarise()`
+* Perform grouped operation: `group_by()`	
+
+## Change names of the variables
+
+### Specific names Manually for a specific variable
+
+```{r}
+oecd_tidy %>%
+  rename('country' = Country,
+         'pol' = POL)
+```
+
+### Rename for specific
+```{r}
+
+oecd_tidy %>%
+  rename_at(vars(1:2), tolower) 
+```
+
+### Rename based on condition
+```{r}
+
+oecd_tidy %>%
+  rename_if(is.numeric, tolower)
+```
+
+### Rename all
+
+```{r}
+
+oecd_tidy <- oecd_tidy %>%
+  rename_all(tolower) %>%
+  rename('th_tonne_co2_eq' = total)
+```
+
+
+## Select variables using `select()`
+
+###Explicitly specify the column names
+
+```{r}
+
+oecd_tidy %>%
+  select(country, pol, year, th_tonne_co2_eq)
+
+```
+
+### include continuous coloums
+
+```{r}
+
+oecd_tidy %>%
+  select(country : th_tonne_co2_eq)
+
+```
+
+### Omit unwanted columns
+
+```{r}
+
+oecd_tidy %>%
+  select(-c(index_1990 : index_2000))
+
+```
+
+## With helpper functions
+
+### starts_with
+```{r}
+
+oecd_tidy %>%
+  select(-starts_with('I'))
+
+```
+
+### ends_with
+```{r}
+
+oecd_tidy %>%
+  select(-ends_with('2000'))
+
+```
+
+### contains
+```{r}
+
+oecd_tidy %>%
+  select(-contains('_'))
+
+```
+
+## Select Observation using `filter()`
+
+### Filtera single observation from a single variable 
+```{r}
+
+oecd_tidy %>%
+  filter(country == 'Denmark')
+
+```
+
+### Filter multiple observations from a single variable 
+```{r}
+
+oecd_tidy %>%
+  filter(country %in% c('Denmark', 'Spain', 'China'))
+
+```
+
+### Filter multiple observations from a multiple variable 
+```{r}
+
+oecd_tidy %>%
+  filter(country %in% c('Denmark', 'Spain', 'China'),
+         year >= 2000 & year <= 2010)
+
+```
+
+### Filter based on the presence of a string
+```{r}
+
+oecd_tidy %>%
+  filter(grepl('ia', country))
+
+```
+
+## make new variable using `mutate()`
+
+
+### Numeric operation
+```{r}
+
+oecd_tidy_mt <- oecd_tidy %>%
+  mutate(mt_co2_eq = th_tonne_co2_eq * 10^3/ 10^6 )
+
+```
+
+### Create a new character coloum
+```{r}
+
+oecd_tidy %>%
+  mutate(country_new = paste(cou, '-' , country ))
+
+```
+
+## Group and summarise data using `group_by()` and `summarise()`
+
+```{r}
+
+oecd_tidy_mt %>%
+  filter(cou %in% c('CHN', 'USA', 'IND')) %>%
+group_by(cou, pol)%>%
+  summarise(n = sum(!is.na(mt_co2_eq)),
+            mean_mt = mean(mt_co2_eq, na.rm = T),
+            tot_mt = sum(mt_co2_eq, na.rm = T),
+            sd_mt = sd(mt_co2_eq, na.rm = T),
+            max_mt = max(mt_co2_eq, na.rm = T),
+            min_mt = min(mt_co2_eq, na.rm = T)) %>%
+  View()
+```
+
+## Arrange observation using `arrange`
+```{r}
+
+oecd_tidy_mt %>%
+  arrange(desc(mt_co2_eq))
+
+```
+
+
+

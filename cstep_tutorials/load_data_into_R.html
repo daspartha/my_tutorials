@@ -1520,48 +1520,79 @@ div.tocify {
 <div id="intializing-libraries" class="section level1">
 <h1>Intializing Libraries</h1>
 <pre class="r"><code>library(readr)
-library(xlsx)
-library(here)</code></pre>
+library(readxl)
+library(openxlsx)</code></pre>
+<pre><code>## Warning: package &#39;openxlsx&#39; was built under R version 3.6.2</code></pre>
+<pre class="r"><code>library(here)</code></pre>
 <pre><code>## here() starts at F:/learning/r_tutorials</code></pre>
-<div id="read-write-text-files" class="section level2">
-<h2>Read/ write text files</h2>
+</div>
+<div id="read-write-delimited-text-files" class="section level1">
+<h1>Read/ write delimited text files</h1>
 <p>A lots of data comes as a simple tabular text files. We shall learn how to to import those data into R using <code>readr</code> package of tidyverse family</p>
-<div id="reading-a-comma-separated-file" class="section level3">
-<h3>Reading a comma separated file</h3>
+<div id="reading-single-delimited-files" class="section level2">
+<h2>Reading single delimited files</h2>
+<p>Reading a comma separated file</p>
 <pre class="r"><code>netflix &lt;- read_csv(here(&quot;cstep_tutorials/data&quot;, &quot;netflix_titles_nov_2019.csv&quot;))</code></pre>
-<pre><code>## Parsed with column specification:
-## cols(
-##   show_id = col_double(),
-##   title = col_character(),
-##   director = col_character(),
-##   cast = col_character(),
-##   country = col_character(),
-##   date_added = col_character(),
-##   release_year = col_double(),
-##   rating = col_character(),
-##   duration = col_character(),
-##   listed_in = col_character(),
-##   description = col_character(),
-##   type = col_character()
-## )</code></pre>
+<p>reading tab delimited files</p>
+<pre class="r"><code>netflix &lt;- read_tsv(here(&quot;cstep_tutorials/data&quot;, &quot;netflix_titles_nov_2019.txt&quot;))</code></pre>
+<p>Read any delimited files</p>
+<pre class="r"><code>netflix &lt;- read_delim(here(&quot;cstep_tutorials/data&quot;, &quot;netflix_sep_dollar.txt&quot;), delim = &#39;$&#39;)</code></pre>
+<div id="exploring-some-arguments" class="section level3">
+<h3>Exploring some arguments</h3>
+<ul>
+<li><code>col_names</code></li>
+<li><code>col_types</code></li>
+<li><code>na</code></li>
+<li><code>skip</code></li>
+<li><code>n_max</code></li>
+<li><code>guess_max</code></li>
+</ul>
 </div>
-<div id="read-a-delimited-file" class="section level3">
-<h3>Read a delimited file</h3>
-</div>
+<div id="parsing" class="section level3">
+<h3>Parsing</h3>
 </div>
 </div>
-<div id="from-excel-files" class="section level1">
-<h1>From Excel files</h1>
+<div id="writing-a-delimited-file" class="section level2">
+<h2>Writing a delimited file</h2>
+<p>Comma delimited using <code>write_csv()</code></p>
+<pre class="r"><code>write_csv(netflix, here(&#39;cstep_tutorials/out&#39;, &#39;netflix_comma_csv.csv&#39;))</code></pre>
+<p>Tab delimited using <code>write_tsv()</code></p>
+<pre class="r"><code>write_tsv(netflix, here(&#39;cstep_tutorials/out&#39;, &#39;netflix_comma_csv.csv&#39;))</code></pre>
+<p>Comma delimited using <code>write_delim()</code></p>
+<pre class="r"><code>write_delim(netflix, here(&#39;cstep_tutorials/out&#39;, &#39;netflix_comma_delim.txt&#39;), delim= &#39;,&#39;)</code></pre>
+<p>Tab delimited using <code>write_delim()</code></p>
+<pre class="r"><code>write_delim(netflix, here(&#39;cstep_tutorials/out&#39;, &#39;netflix_sep_tab.txt&#39;), delim = &#39;\t&#39;)</code></pre>
+<p>‘$’ delimited using <code>write_delim()</code></p>
+<pre class="r"><code>write_delim(netflix, here(&#39;cstep_tutorials/out&#39;, &#39;netflix_sep_dollar.txt&#39;), delim = &#39;$&#39;)</code></pre>
+</div>
+</div>
+<div id="read-write-excel-files" class="section level1">
+<h1>Read/ write Excel files</h1>
 <p>A lots of data comes as Excel spreadsheets simple tabular text files. We shall learn how to to import those data into R using <code>readr</code> package of tidyverse family</p>
+<div id="read-excel-files-with-single-sheet" class="section level2">
+<h2>Read Excel files with single sheet</h2>
+<pre class="r"><code>netflix &lt;- read_excel(here(&quot;cstep_tutorials/data&quot;, &quot;netflix_titles_nov_2019.xlsx&quot;), sheet = 1)</code></pre>
 </div>
-<div id="writing-data-in-r" class="section level1">
-<h1>Writing data in R</h1>
+<div id="write-excel-files" class="section level2">
+<h2>Write Excel files</h2>
+<p>Single sheet</p>
+<pre class="r"><code>openxlsx::write.xlsx(netflix, here(&quot;cstep_tutorials/out&quot;, &quot;netflix_titles_nov_2019.xlsx&quot;), row.names=FALSE, sheetName = &#39;netflix_1&#39;)
+
+openxlsx::write.xlsx(netflix, here(&quot;cstep_tutorials/out&quot;, &quot;netflix_titles_nov_2019.xlsx&quot;), sheetName = &#39;netflix_2&#39;)</code></pre>
 </div>
-<div id="to-text-files" class="section level1">
-<h1>To text files</h1>
 </div>
-<div id="to-excel-files" class="section level1">
-<h1>To Excel files</h1>
+<div id="advanced-import-export" class="section level1">
+<h1>Advanced import export</h1>
+<div id="read-multiple-delimited-files" class="section level2">
+<h2>Read multiple delimited files</h2>
+</div>
+<div id="read-excel-files-with-multiple-sheets" class="section level2">
+<h2>Read Excel files with multiple sheets</h2>
+</div>
+<div id="read-multiple-excel-files-with-multiple-sheets" class="section level2">
+<h2>Read multiple Excel files with multiple sheets</h2>
+<p>Multiple sheets</p>
+</div>
 </div>
 
 

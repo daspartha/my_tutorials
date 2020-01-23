@@ -14,39 +14,150 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 # Intializing Libraries
 
 ```{r}
 library(readr)
-library(xlsx)
+library(readxl)
+library(openxlsx)
 library(here)
 ```
 
-
-## Read/ write text files
+# Read/ write delimited text files
 
 A lots of data comes as a simple tabular text files. We shall learn how to to import those data into R using `readr` package of tidyverse family
 
-### Reading a comma separated file 
+## Reading single delimited files
 
-```{r}
+Reading a comma separated file
 
-netflix <- read_csv(here("cstep_tutorials/data", "netflix_titles_nov_2019.csv"))
+```{r, message=FALSE}
+
+netflix <- read_csv(here("cstep_tutorials/data", "netflix_titles_nov_2019.csv")); netflix
 
 ```
 
-### Read a delimited file
+reading tab delimited files
+
+```{r, message=FALSE}
+
+netflix <- read_tsv(here("cstep_tutorials/data", "netflix_titles_nov_2019.txt")); netflix
+
+```
+
+Read any delimited files
+
+```{r, message=FALSE}
+
+netflix <- read_delim(here("cstep_tutorials/data", "netflix_sep_dollar.txt"), delim = '$'); netflix
+```
+
+### Exploring some arguments
+
+* `col_names`
+* `col_types`
+* `na`
+* `skip`
+* `n_max`
+* `guess_max`
+
+### Parsing
+
+## Writing a delimited file
+
+Comma delimited using `write_csv()`
+
+```{r}
+
+write_csv(netflix, here('cstep_tutorials/out', 'netflix_comma_csv.csv'))
+```
+
+Tab delimited using `write_tsv()`
+
+```{r}
+
+write_tsv(netflix, here('cstep_tutorials/out', 'netflix_comma_csv.csv'))
+```
+
+Comma delimited using `write_delim()`
+
+```{r}
+
+write_delim(netflix, here('cstep_tutorials/out', 'netflix_comma_delim.txt'), delim= ',')
+```
+
+Tab delimited using `write_delim()`
+
+```{r}
+
+write_delim(netflix, here('cstep_tutorials/out', 'netflix_sep_tab.txt'), delim = '\t')
+```
+
+'\$' delimited using `write_delim()`
+
+```{r}
+
+write_delim(netflix, here('cstep_tutorials/out', 'netflix_sep_dollar.txt'), delim = '$')
+```
 
 
-
-# From Excel files
+# Read/ write Excel files
 
 A lots of data comes as Excel spreadsheets simple tabular text files. We shall learn how to to import those data into R using `readr` package of tidyverse family
 
-# Writing data in R
+## Read Excel files with single sheet
 
-# To text files
+```{r, message=FALSE}
 
+netflix <- read_excel(here("cstep_tutorials/data", "netflix_titles_nov_2019.xlsx"), sheet = 1); netflix
 
-# To Excel files
+netflix <- read_excel(here("cstep_tutorials/data", "netflix_titles_nov_2019.xlsx"), sheet = 'netflix_titles_nov_2019'); netflix
+
+```
+
+## Write Excel files
+
+Single sheet
+
+```{r, message=FALSE}
+
+openxlsx::write.xlsx(netflix, here("cstep_tutorials/out", "netflix_titles_nov_2019.xlsx"), sheetName = 'netflix_1')
+
+openxlsx::write.xlsx(netflix, here("cstep_tutorials/out", "netflix_titles_nov_2019.xlsx"), sheetName = 'netflix_2')
+
+```
+
+Look into the options
+
+# Advanced import export
+
+## Read multiple delimited files
+
+## Read Excel files with multiple sheets
+
+## Read multiple Excel files with multiple sheets
+
+Multiple sheets
+
+```{r, echo=FALSE, eval=FALSE}
+
+# create a workbook
+
+netflix_data = createWorkbook()
+
+# create sheets
+sheet1 = addWorksheet(netflix_data, 'netflix')
+netflix_sheet = addWorksheet(netflix_data, 'netflix', gridLines = FALSE)
+
+# write data into the sheets
+
+# save the workbook
+saveWorkbook(netflix_data, here("cstep_tutorials/out", "multi_sheet_example.xlsx"), overwrite = TRUE)
+
+```
+
+```{r, echo=FALSE}
+list_of_datasets <- list(netflix, netflix)
+write.xlsx(list_of_datasets, file = "writeXLSX2.xlsx", overwrite = TRUE)
+```
+

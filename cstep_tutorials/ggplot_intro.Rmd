@@ -246,3 +246,5 @@ ggplot() +
   geom_line(mapping = aes(x = year, y = gdpPercap, group = country)) +
   facet_wrap(~country)
 ```
+
+# dplyr, tidyr, ggplot2
